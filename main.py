@@ -107,7 +107,8 @@ async def weather(message: Message):
 def get_weather(city="Moscow"):
     api_key = "d9a0f4c37c536dec3b20825900c97115"
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
-    response = requests.get(url)
+    timeout = 30  # секунды
+    response = requests.get(url, timeout=timeout)
     data = response.json()
 
     if data.get("cod") != 200:
