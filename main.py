@@ -13,7 +13,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 
-@dp.message(Command("video"))
+@dp.message(Command("video"))  # команда для запуска видео
 async def video(message: Message):
     await bot.send_chat_action(message.chat.id, "upload_video")
     try:
@@ -22,12 +22,23 @@ async def video(message: Message):
     except Exception as e:
         await message.answer(f"Ошибка: {e}")
 
-@dp.message(Command("audio"))
+@dp.message(Command("voice"))  # команда озвучивания голосовых сообщений
+async def voice(message: Message):
+    voice = FSInputFile("multyashnyiy-golos.ogg")
+    await message.answer_voice(voice)
+
+@dp.message(Command("doc"))  # команда отправки документа
+async def doc(message: Message):
+    doc = FSInputFile("payment_report.pdf")
+    await bot.send_document(message.chat.id, doc)
+
+@dp.message(Command("audio"))  # команда для запуска аудио
 async def audio(message: Message):
     audio = FSInputFile("metro-poezd.mp3")
     await bot.send_audio(message.chat.id, audio)
 
-@dp.message(Command("training"))
+
+@dp.message(Command("training"))  # команда для запуска мини рандомной тренировки
 async def training(message: Message):
     training_list = [
         "Тренировка 1:\n1. Скручивания: 3 подхода по 15 повторений\n2. Велосипед: 3 подхода по 20 повторений (каждая сторона)\n3. Планка: 3 подхода по 30 секунд",
@@ -37,14 +48,14 @@ async def training(message: Message):
     rand_training = random.choice(training_list)
     await message.answer(f"Это ваша мини тренировка на сегодня:\n{rand_training}")
 
-    tts = gTTS(text =rand_training, lang='ru')
-    tts.save("training.mp3")
-    audio = FSInputFile("training.mp3")
+    tts = gTTS(text =rand_training, lang='ru')  # Создаем объект gTTS для преобразования текста в аудио
+    tts.save("training.ogg")
+    audio = FSInputFile("training.ogg")
     await bot.send_audio(message.chat.id, audio)
-    os.remove("training.mp3")
+    os.remove("training.ogg")
 
 
-@dp.message(F.photo)
+@dp.message(F.photo)  # команды реакций на фотографии
 async def react_photo(message: Message):
     list = ['Ого, какая фотка!', 'Не понятно, что это может быть!', 'Я не знаю, что это такое!', 'Не отправляйте мне такое больше!', 'Круто!', 'Это очень красивое фото!']
     rand_answ = random.choice(list)
@@ -62,7 +73,7 @@ async def aitext(message: Message):
     await message.answer('Искусственный интеллект — это свойство искусственных интеллектуальных систем выполнять творческие функции, которые традиционно считаются прерогативой человека; наука и технология создания интеллектуальных машин, особенно интеллектуальных компьютерных программ')
 
 
-@dp.message(Command("help"))
+@dp.message(Command("help"))  # команда для вызова всех команд, которые может выполнять бот
 async def help(message: Message):
     await message.answer("Привет! Я бот, который может отправлять новости. Вот мои команды:\n"
                          "/start - Запустить бота\n"
@@ -72,7 +83,9 @@ async def help(message: Message):
                          "/react_photo - реагировать на фото\n"
                          "/audio - отправить аудио\n"
                          "/video - отправить видео\n"
-                         "/training - отправить тренировку")
+                         "/training - отправить тренировку\n"
+                         "/voice - отправить голосовое сообщение\n"
+                         "/doc - отправить документ\n")
 
 
 @dp.message(CommandStart())
@@ -86,7 +99,7 @@ async def main():
     await on_startup(dp)
     await dp.start_polling(bot)
 
-@dp.message(Command("weather"))
+@dp.message(Command("weather"))  # команда для вызова погоды в москве
 async def weather(message: Message):
     await message.answer(get_weather())
 
