@@ -1,13 +1,47 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
 from config import TOKEN
 import random
 import requests
+from gtts import gTTS
+import os
+
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+
+@dp.message(Command("video"))
+async def video(message: Message):
+    await bot.send_chat_action(message.chat.id, "upload_video")
+    try:
+        video = FSInputFile("tg02-aiogram-test.mp4")
+        await bot.send_video(message.chat.id, video)
+    except Exception as e:
+        await message.answer(f"Ошибка: {e}")
+
+@dp.message(Command("audio"))
+async def audio(message: Message):
+    audio = FSInputFile("metro-poezd.mp3")
+    await bot.send_audio(message.chat.id, audio)
+
+@dp.message(Command("training"))
+async def training(message: Message):
+    training_list = [
+        "Тренировка 1:\\n1. Скручивания: 3 подхода по 15 повторений\\n2. Велосипед: 3 подхода по 20 повторений (каждая сторона)\\n3. Планка: 3 подхода по 30 секунд",
+        "Тренировка 2:\\n1. Подъемы ног: 3 подхода по 15 повторений\\n2. Русский твист: 3 подхода по 20 повторений (каждая сторона)\\n3. Планка с поднятой ногой: 3 подхода по 20 секунд (каждая нога)",
+        "Тренировка 3:\\n1. Скручивания с поднятыми ногами: 3 подхода по 15 повторений\\n2. Горизонтальные ножницы: 3 подхода по 20 повторений\\n3. Боковая планка: 3 подхода по 20 секунд (каждая сторона)"
+    ]
+    rand_training = random.choice(training_list)
+    await message.answer(f"Это ваша мини тренировка на сегодня:\n{rand_training}")
+
+    tts = gTTS(text =rand_training, lang='ru')
+    tts.save("training.mp3")
+    audio = FSInputFile("training.mp3")
+    await bot.send_audio(message.chat.id, audio)
+    os.remove("training.mp3")
 
 
 @dp.message(F.photo)
@@ -35,7 +69,9 @@ async def help(message: Message):
                          "/weather - Получить последнюю новость\n"
                          "/help - вызов всех команд, которые может выполнять бот\n"
                          "/photo - отправить фото\n"
-                         "/react_photo - реагировать на фото")
+                         "/react_photo - реагировать на фото\n"
+                         "/audio - отправить аудио\n"
+                         "/video - отправить видео")
 
 
 @dp.message(CommandStart())
