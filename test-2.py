@@ -41,7 +41,10 @@ init_db()
 
 @dp.message(CommandStart())
 async def start(message: Message, state: FSMContext):
-    await message.answer("Привет! Я бот. Введи свое имя и фамилию:", reply_markup=kb.main)
+    # reply_markup=kb.main - это строка, которая добавляет клавиатуру в сообщение.
+    # reply_markup=kb.inline_keyboard_test - это строка, которая добавляет inline-клавиатуру в сообщение.
+    # reply_markup=await kb.test_keyboard()) - это строка, которая добавляет inline-клавиатуру в сообщение.
+    await message.answer("Привет! Я бот. Введи свое имя и фамилию:", reply_markup=await kb.test_keyboard())
     await state.set_state(Form.name)
 
 
