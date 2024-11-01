@@ -8,8 +8,10 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 import logging
 from aiogram.fsm.state import State, StatesGroup
+from aiogram import types
+from keyboards_2 import inline_keyboard_greetings
 
-import keyboards as kb
+import keyboards_2 as kb
 
 
 bot = Bot(token=TOKEN)
@@ -19,19 +21,15 @@ logging.basicConfig(level=logging.INFO)
 
 class Form(StatesGroup):
     name = State()
-    age = State()
-    grade = State()
 
 
 def init_db():
-    conn = sqlite3.connect('school_data.db')
+    conn = sqlite3.connect('person_data.db')
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS students (
+        CREATE TABLE IF NOT EXISTS person_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            age INTEGER,
-            grade TEXT)
+            name TEXT)
             ''')
 
     conn.commit()
@@ -40,49 +38,44 @@ def init_db():
 init_db()
 
 @dp.message(CommandStart())
-async def start(message: Message, state: FSMContext):
-    # reply_markup=kb.main - это строка, которая добавляет клавиатуру в сообщение.
-    # reply_markup=kb.inline_keyboard_test - это строка, которая добавляет inline-клавиатуру в сообщение.
-    # reply_markup=await kb.test_keyboard()) - это строка, которая добавляет inline-клавиатуру в сообщение.
-    await message.answer("Привет! Я бот. Введи свое имя и фамилию:", reply_markup=await kb.test_keyboard())
+async def start_menu(message: Message, state: FSMContext):
+    await message.answer("Привет! Как твое имя:")
     await state.set_state(Form.name)
+
 
 
 @dp.message(Form.name)
 async def name(message: Message, state: FSMContext):
+    print("Получено имя:", message.text)
     await state.update_data(name=message.text)
-    await message.answer("Введи свой возраст:")
-    await state.set_state(Form.age)
-
-
-@dp.message(Form.age)
-async def age(message: Message, state: FSMContext):
-    await state.update_data(age=message.text)
-    age = int(message.text)
-    if age < 18:
-        grade_text = "класс"
-    else:
-        grade_text = "курс"
-    await message.answer(f"Введи свой {grade_text}:")
-    await state.set_state(Form.grade)
-
-
-@dp.message(Form.grade)
-async def grade(message: Message, state: FSMContext):
-    await state.update_data(grade=message.text)
     user_data = await state.get_data()
+    print("Данные:", user_data)
 
     # Сохранение данных в базе данных
-    conn = sqlite3.connect('school_data.db')
+    conn = sqlite3.connect('person_data.db')
     cursor = conn.cursor()
-    cursor.execute('''INSERT INTO students (name, age, grade) VALUES (?, ?, ?)''',
-                (user_data['name'], user_data['age'], user_data['grade']))
+    cursor.execute('''INSERT INTO person_data (name) VALUES (?)''',
+                (user_data['name'],))
     conn.commit()
     conn.close()
+    print("Данные сохранены!")
 
-    await message.answer("Спасибо за информацию!\n Данные сохранены!")
-    await state.clear()
+    await message.answer("Спасибо!\n Данные сохранены!", reply_markup=inline_keyboard_greetings)
+    # await state.clear()
 
+
+@dp.callback_query()
+async def menu_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    # Загружаем данные о пользователе из состояния
+    user_data = await state.get_data()
+    user_name = user_data.get("name")
+
+
+    # Формируем ответ на основе нажатой кнопки
+    if callback_query.data == "hello":
+        await callback_query.message.answer(f"Привет, {user_name}!")
+    elif callback_query.data == "bye":
+        await callback_query.message.answer(f"До свидания, {user_name}!")
 
 
 async def main():
