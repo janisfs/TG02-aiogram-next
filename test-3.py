@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, FSInputFile, CallbackQuery
+from aiogram.types import Message, FSInputFile
 from config import TOKEN
 import sqlite3
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -44,30 +44,8 @@ async def start(message: Message, state: FSMContext):
     # reply_markup=kb.main - это строка, которая добавляет клавиатуру в сообщение.
     # reply_markup=kb.inline_keyboard_test - это строка, которая добавляет inline-клавиатуру в сообщение.
     # reply_markup=await kb.test_keyboard()) - это строка, которая добавляет inline-клавиатуру в сообщение.
-    # kb.main - это строка, которая добавляет клавиатуру в сообщение.
-    await message.answer("Привет! Введи свое имя и фамилию:", reply_markup=kb.inline_keyboard_test)
+    await message.answer("Привет! Я бот. Введи свое имя и фамилию:", reply_markup=await kb.test_keyboard())
     await state.set_state(Form.name)
-
-
-@dp.callback_query(F.data == "catalog")
-async def catalog(callback: CallbackQuery):
-    await callback.message.answer("Вы нажали на кнопку 'Каталог'")
-
-
-@dp.callback_query(F.data == "news")
-async def catalog(callback: CallbackQuery):
-    await callback.answer("Новости подгружаются...", show_alert=True)
-    await callback.message.answer("Вы нажали на кнопку 'Новости'")
-
-@dp.callback_query(F.data == "quote")
-async def catalog(callback: CallbackQuery):
-    await callback.answer("Свежие цитаты подгружаются...", show_alert=True)
-    await callback.message.edit_text("Вы нажали на кнопку 'Цитаты'", reply_markup=await kb.message_keyboard())
-
-
-@dp.message(F.text == "Тестовая кнопка 1")
-async def test_button_1(message: Message):
-    await message.answer("Вы нажали на кнопку 1")
 
 
 @dp.message(Form.name)

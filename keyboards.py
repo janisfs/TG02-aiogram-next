@@ -10,17 +10,29 @@ main = ReplyKeyboardMarkup(keyboard=[
 )
 
 inline_keyboard_test = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="My YouTube channel",
-                          url = "https://www.youtube.com/@janisfs")],
+    [InlineKeyboardButton(text="Каталог", callback_data="catalog")],
+    [InlineKeyboardButton(text="Новости", callback_data="news")],
+    [InlineKeyboardButton(text="Профиль", callback_data="profile")],
+    [InlineKeyboardButton(text="Цитата", callback_data="quote")]
    ])
 
 test = ["Кнопка 1", "Кнопка 2", "Кнопка 3", "Кнопка 4"]
 
+
+# message_keyboard - это строка, которая добавляет inline-клавиатуру в сообщение. После клика на кнопку, появляется добавочное меню.
+async def message_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    for key in test:
+        keyboard.add(InlineKeyboardButton(text=key, url='https://www.youtube.com/@janisfs'))
+    return keyboard.adjust(2).as_markup(resize_keyboard=True)
+
+
+# test_keyboard - это строка, которая добавляет inline-клавиатуру в сообщение.
 async def test_keyboard():
-    keyboard = ReplyKeyboardBuilder(resize_keyboard=True) # resize_keyboard=True - адаптирует размер клавиатуры
+    keyboard = ReplyKeyboardBuilder() # resize_keyboard=True - адаптирует размер клавиатуры
     for key in test:
         keyboard.add(KeyboardButton(text=key))
-    return keyboard.adjust(2).as_markup()
+    return keyboard.adjust(2).as_markup(resize_keyboard=True)
 
 
 
