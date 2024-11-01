@@ -61,7 +61,6 @@ async def name(message: Message, state: FSMContext):
     print("Данные сохранены!")
 
     await message.answer("Спасибо!\n Данные сохранены!", reply_markup=inline_keyboard_greetings)
-    # await state.clear()
 
 
 @dp.callback_query()
