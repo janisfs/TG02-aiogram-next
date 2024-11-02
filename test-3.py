@@ -67,13 +67,13 @@ async def catalog(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "music")
 async def catalog(callback: CallbackQuery):
-    await callback.answer("Музыка подгружаются...", show_alert=True)
+    await callback.answer("Музыка подгружается...", show_alert=True)
     await callback.message.answer("https://music.yandex.ru/home")
 
 
 @dp.callback_query(F.data == "video")
 async def catalog(callback: CallbackQuery):
-    await callback.answer("Видео подгружаются...", show_alert=True)
+    await callback.answer("Видео подгружается...", show_alert=True)
     await callback.message.answer("https://www.youtube.com/")
 
 
