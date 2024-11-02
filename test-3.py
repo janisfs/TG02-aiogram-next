@@ -9,8 +9,10 @@ from aiogram.fsm.context import FSMContext
 import logging
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import types
-from keyboards_2 import inline_keyboard_greetings
+from keyboards_2 import inline_keyboard_greetings, inline_keyboard_links, options_keyboard
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+
+
 
 import keyboards_2 as kb
 
@@ -49,8 +51,9 @@ async def help(message: Message):
     await message.answer("Доступные команды:\n"
                          "/start - начать диалог\n"
                          "/help - вызов всех команд, которые может выполнять бот\n"
-                         "/links - показать ссылки на новости, музыку и видео"
-                         )
+                         "/links - показать ссылки на новости, музыку и видео\n"
+                         "/dynamic - показать больше информации\n"
+    )
 
 
 @dp.message(Command("links"))
@@ -75,6 +78,38 @@ async def catalog(callback: CallbackQuery):
 async def catalog(callback: CallbackQuery):
     await callback.answer("Видео подгружается...", show_alert=True)
     await callback.message.answer("https://www.youtube.com/")
+
+
+# Инлайн-клавиатура для команды /dynamic
+dynamic_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Показать больше", callback_data="show_more")]
+])
+
+
+@dp.message(Command("dynamic"))
+async def dynamic_command(message: Message):
+    await message.answer("Нажмите на кнопку 'Показать больше'", reply_markup=dynamic_keyboard)
+
+
+@dp.callback_query()
+async def callback_handler(callback: CallbackQuery, state: FSMContext):
+    # Обработка динамической клавиатуры
+    if callback.data == "show_more":
+        await callback.message.edit_text("Выберите опцию:", reply_markup=options_keyboard)
+    elif callback.data == "option_1":
+        await callback.message.answer("Вы выбрали Опцию 1")
+    elif callback.data == "option_2":
+        await callback.message.answer("Вы выбрали Опцию 2")
+
+    # Обработка "Привет" и "До свидания" с использованием имени пользователя
+    elif callback.data == "hello" or callback.data == "bye":
+        user_data = await state.get_data()
+        user_name = user_data.get("name", "друг")  # Вытаскиваем имя из состояния (по умолчанию "друг")
+
+        if callback.data == "hello":
+            await callback.message.answer(f"Привет, {user_name}!")
+        elif callback.data == "bye":
+            await callback.message.answer(f"До свидания, {user_name}!")
 
 
 @dp.message(Form.name)
