@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, CallbackQuery
 from config import TOKEN
 import sqlite3
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -10,6 +10,7 @@ import logging
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import types
 from keyboards_2 import inline_keyboard_greetings
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 import keyboards_2 as kb
 
@@ -43,6 +44,38 @@ async def start_menu(message: Message, state: FSMContext):
     await state.set_state(Form.name)
 
 
+@dp.message(Command("help"))
+async def help(message: Message):
+    await message.answer("Доступные команды:\n"
+                         "/start - начать диалог\n"
+                         "/help - вызов всех команд, которые может выполнять бот\n"
+                         "/links - показать ссылки на новости, музыку и видео"
+                         )
+
+
+@dp.message(Command("links"))
+async def links(message: Message, state: FSMContext):
+    await message.answer("Выберите ссылку:", reply_markup=kb.inline_keyboard_links)
+    # await state.set_state(Form.name) - для случаев привязки к пользователям
+
+
+@dp.callback_query(F.data == "news")
+async def catalog(callback: CallbackQuery):
+    await callback.answer("Новости подгружаются...", show_alert=True)
+    await callback.message.answer("https://ria.ru/")
+
+
+@dp.callback_query(F.data == "music")
+async def catalog(callback: CallbackQuery):
+    await callback.answer("Музыка подгружаются...", show_alert=True)
+    await callback.message.answer("https://music.yandex.ru/home")
+
+
+@dp.callback_query(F.data == "video")
+async def catalog(callback: CallbackQuery):
+    await callback.answer("Видео подгружаются...", show_alert=True)
+    await callback.message.answer("https://www.youtube.com/")
+
 
 @dp.message(Form.name)
 async def name(message: Message, state: FSMContext):
@@ -75,6 +108,7 @@ async def menu_handler(callback_query: types.CallbackQuery, state: FSMContext):
         await callback_query.message.answer(f"Привет, {user_name}!")
     elif callback_query.data == "bye":
         await callback_query.message.answer(f"До свидания, {user_name}!")
+
 
 
 async def main():
